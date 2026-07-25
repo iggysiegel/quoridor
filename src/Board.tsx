@@ -10,16 +10,15 @@ const INITIAL_STATE: GameState = {
   turn: "p1",
 };
 
-function getPlayerAt(
-  state: GameState,
-  row: number,
-  col: number,
-): PlayerId | null {
+function getPlayerAt(state: GameState, position: Position): PlayerId | null {
   const p1Position = state.positions.p1;
   const p2Position = state.positions.p2;
-  if (p1Position.row === row && p1Position.col === col) {
+  if (p1Position.row === position.row && p1Position.col === position.col) {
     return "p1";
-  } else if (p2Position.row === row && p2Position.col === col) {
+  } else if (
+    p2Position.row === position.row &&
+    p2Position.col === position.col
+  ) {
     return "p2";
   } else {
     return null;
@@ -41,12 +40,47 @@ function movePlayer(
   };
 }
 
+function isValidMove(
+  state: GameState,
+  player: PlayerId,
+  target: Position,
+): boolean {
+  // A player cannot move to an occupied square
+  if (getPlayerAt(state, target) !== null) {
+    return false;
+  }
+
+  // Normal move (one square)
+  const currentPosition = state.positions[player];
+  const rowDistance = Math.abs(currentPosition.row - target.row);
+  const colDistance = Math.abs(currentPosition.col - target.col);
+  if (rowDistance + colDistance === 1) {
+    return true;
+  }
+
+  // Special move (jumping straight over the opponent)
+  const isStraightJump =
+    (rowDistance === 2 && colDistance === 0) ||
+    (rowDistance === 0 && colDistance === 2);
+  if (!isStraightJump) {
+    return false;
+  }
+  const midpoint = {
+    row: (currentPosition.row + target.row) / 2,
+    col: (currentPosition.col + target.col) / 2,
+  };
+  const opponent = player === "p1" ? "p2" : "p1";
+  return getPlayerAt(state, midpoint) === opponent;
+}
+
 export default function Board() {
   const [boardState, setBoardState] = useState(INITIAL_STATE);
 
   function handleClick(row: number, col: number) {
-    const newState = movePlayer(boardState, boardState.turn, { row, col });
-    setBoardState(newState);
+    const target = { row, col };
+    if (isValidMove(boardState, boardState.turn, target)) {
+      setBoardState(movePlayer(boardState, boardState.turn, target));
+    }
   }
 
   const rows = Array.from({ length: 9 }, (_, row) => row);
@@ -55,7 +89,7 @@ export default function Board() {
     <div className="board">
       {rows.map((row) =>
         cols.map((col) => {
-          const player = getPlayerAt(boardState, row, col);
+          const player = getPlayerAt(boardState, { row, col });
           return (
             <button
               key={`${row}-${col}`}
