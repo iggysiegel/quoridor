@@ -10,6 +10,11 @@ const INITIAL_STATE: GameState = {
   turn: "p1",
 };
 
+const WINNER_MESSAGE: Record<PlayerId, string> = {
+  p1: "Player 1 Wins",
+  p2: "Player 2 Wins",
+};
+
 function getPlayerAt(state: GameState, position: Position): PlayerId | null {
   const p1Position = state.positions.p1;
   const p2Position = state.positions.p2;
@@ -73,10 +78,26 @@ function isValidMove(
   return getPlayerAt(state, midpoint) === opponent;
 }
 
+function getWinner(state: GameState): PlayerId | null {
+  if (state.positions.p1.row === 0) {
+    return "p1";
+  }
+  if (state.positions.p2.row === 8) {
+    return "p2";
+  }
+  return null;
+}
+
 export default function Board() {
   const [boardState, setBoardState] = useState(INITIAL_STATE);
+  const winner = getWinner(boardState);
+  const winnerMessage = winner && WINNER_MESSAGE[winner];
 
   function handleClick(row: number, col: number) {
+    if (winner) {
+      return;
+    }
+
     const target = { row, col };
     if (isValidMove(boardState, boardState.turn, target)) {
       setBoardState(movePlayer(boardState, boardState.turn, target));
@@ -86,21 +107,24 @@ export default function Board() {
   const rows = Array.from({ length: 9 }, (_, row) => row);
   const cols = Array.from({ length: 9 }, (_, col) => col);
   return (
-    <div className="board">
-      {rows.map((row) =>
-        cols.map((col) => {
-          const player = getPlayerAt(boardState, { row, col });
-          return (
-            <button
-              key={`${row}-${col}`}
-              className="cell"
-              onClick={() => handleClick(row, col)}
-            >
-              {player && <span className={`piece piece-${player}`} />}
-            </button>
-          );
-        }),
-      )}
-    </div>
+    <>
+      <div>{winner && <p>{winnerMessage}</p>}</div>
+      <div className="board">
+        {rows.map((row) =>
+          cols.map((col) => {
+            const player = getPlayerAt(boardState, { row, col });
+            return (
+              <button
+                key={`${row}-${col}`}
+                className="cell"
+                onClick={() => handleClick(row, col)}
+              >
+                {player && <span className={`piece piece-${player}`} />}
+              </button>
+            );
+          }),
+        )}
+      </div>
+    </>
   );
 }
