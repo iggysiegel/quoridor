@@ -1,7 +1,9 @@
 .board {
+  /* 9 cell tracks (40px) interleaved with 8 gap tracks (8px); walls render and
+     get placed in the gaps between cells. */
   display: grid;
-  grid-template-columns: repeat(9, 40px);
-  grid-template-rows: repeat(9, 40px);
+  grid-template-columns: repeat(8, 40px 8px) 40px;
+  grid-template-rows: repeat(8, 40px 8px) 40px;
   width: fit-content;
 }
 
@@ -31,4 +33,28 @@
 
 .piece-p2 {
   background: #2c6fbb;
+}
+
+.wall {
+  border-radius: 4px;
+}
+
+.wall-p1 {
+  background: #d64545;
+}
+
+.wall-p2 {
+  background: #2c6fbb;
+}
+
+.wall-slot {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.wall-slot:hover {
+  background: rgba(107, 74, 47, 0.4);
+  border-radius: 4px;
 }
