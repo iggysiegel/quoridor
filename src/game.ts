@@ -55,6 +55,49 @@ export function placeWall(state: GameState, wall: Wall): GameState {
   };
 }
 
+function positionsEqual(a: Position, b: Position): boolean {
+  return a.row === b.row && a.col === b.col;
+}
+
+function isBlockedByWall(
+  state: GameState,
+  from: Position,
+  to: Position,
+): boolean {
+  return state.walls.some((wall) => {
+    let edge1: [Position, Position];
+    let edge2: [Position, Position];
+    const { row, col } = wall.slot;
+
+    if (wall.orientation === "horizontal") {
+      edge1 = [
+        { row, col },
+        { row: row + 1, col },
+      ];
+      edge2 = [
+        { row, col: col + 1 },
+        { row: row + 1, col: col + 1 },
+      ];
+    } else {
+      edge1 = [
+        { row, col },
+        { row, col: col + 1 },
+      ];
+      edge2 = [
+        { row: row + 1, col },
+        { row: row + 1, col: col + 1 },
+      ];
+    }
+
+    return (
+      (positionsEqual(from, edge1[0]) && positionsEqual(to, edge1[1])) ||
+      (positionsEqual(from, edge1[1]) && positionsEqual(to, edge1[0])) ||
+      (positionsEqual(from, edge2[0]) && positionsEqual(to, edge2[1])) ||
+      (positionsEqual(from, edge2[1]) && positionsEqual(to, edge2[0]))
+    );
+  });
+}
+
 export function isValidMove(
   state: GameState,
   player: PlayerId,
@@ -69,7 +112,10 @@ export function isValidMove(
   const currentPosition = state.positions[player];
   const rowDistance = Math.abs(currentPosition.row - target.row);
   const colDistance = Math.abs(currentPosition.col - target.col);
-  if (rowDistance + colDistance === 1) {
+  if (
+    rowDistance + colDistance === 1 &&
+    !isBlockedByWall(state, currentPosition, target)
+  ) {
     return true;
   }
 
@@ -85,7 +131,11 @@ export function isValidMove(
     col: (currentPosition.col + target.col) / 2,
   };
   const opponent = player === "p1" ? "p2" : "p1";
-  return getPlayerAt(state, midpoint) === opponent;
+  return (
+    getPlayerAt(state, midpoint) === opponent &&
+    !isBlockedByWall(state, currentPosition, midpoint) &&
+    !isBlockedByWall(state, midpoint, target)
+  );
 }
 
 export function getWinner(state: GameState): PlayerId | null {
