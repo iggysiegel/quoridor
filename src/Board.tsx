@@ -7,6 +7,7 @@ import {
   getWinner,
   INITIAL_STATE,
   isValidMove,
+  isValidWallPlacement,
   movePlayer,
   placeWall,
 } from "./game";
@@ -49,13 +50,10 @@ export default function Board() {
       return;
     }
 
-    setBoardState(
-      placeWall(boardState, {
-        slot: { row, col },
-        orientation,
-        player: boardState.turn,
-      }),
-    );
+    const wall = { slot: { row, col }, orientation, player: boardState.turn };
+    if (isValidWallPlacement(boardState, wall)) {
+      setBoardState(placeWall(boardState, wall));
+    }
   }
 
   const rows = Array.from({ length: 9 }, (_, row) => row);

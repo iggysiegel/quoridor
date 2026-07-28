@@ -32,6 +32,16 @@ export function getPlayerAt(
   }
 }
 
+export function getWinner(state: GameState): PlayerId | null {
+  if (state.positions.p1.row === 0) {
+    return "p1";
+  }
+  if (state.positions.p2.row === 8) {
+    return "p2";
+  }
+  return null;
+}
+
 export function movePlayer(
   state: GameState,
   player: PlayerId,
@@ -45,57 +55,6 @@ export function movePlayer(
     },
     turn: player === "p1" ? "p2" : "p1",
   };
-}
-
-export function placeWall(state: GameState, wall: Wall): GameState {
-  return {
-    ...state,
-    walls: [...state.walls, wall],
-    turn: state.turn === "p1" ? "p2" : "p1",
-  };
-}
-
-function positionsEqual(a: Position, b: Position): boolean {
-  return a.row === b.row && a.col === b.col;
-}
-
-function isBlockedByWall(
-  state: GameState,
-  from: Position,
-  to: Position,
-): boolean {
-  return state.walls.some((wall) => {
-    let edge1: [Position, Position];
-    let edge2: [Position, Position];
-    const { row, col } = wall.slot;
-
-    if (wall.orientation === "horizontal") {
-      edge1 = [
-        { row, col },
-        { row: row + 1, col },
-      ];
-      edge2 = [
-        { row, col: col + 1 },
-        { row: row + 1, col: col + 1 },
-      ];
-    } else {
-      edge1 = [
-        { row, col },
-        { row, col: col + 1 },
-      ];
-      edge2 = [
-        { row: row + 1, col },
-        { row: row + 1, col: col + 1 },
-      ];
-    }
-
-    return (
-      (positionsEqual(from, edge1[0]) && positionsEqual(to, edge1[1])) ||
-      (positionsEqual(from, edge1[1]) && positionsEqual(to, edge1[0])) ||
-      (positionsEqual(from, edge2[0]) && positionsEqual(to, edge2[1])) ||
-      (positionsEqual(from, edge2[1]) && positionsEqual(to, edge2[0]))
-    );
-  });
 }
 
 export function isValidMove(
@@ -138,12 +97,69 @@ export function isValidMove(
   );
 }
 
-export function getWinner(state: GameState): PlayerId | null {
-  if (state.positions.p1.row === 0) {
-    return "p1";
-  }
-  if (state.positions.p2.row === 8) {
-    return "p2";
-  }
-  return null;
+function isBlockedByWall(
+  state: GameState,
+  from: Position,
+  to: Position,
+): boolean {
+  return state.walls.some((wall) => {
+    let edge1: [Position, Position];
+    let edge2: [Position, Position];
+    const { row, col } = wall.slot;
+
+    if (wall.orientation === "horizontal") {
+      edge1 = [
+        { row, col },
+        { row: row + 1, col },
+      ];
+      edge2 = [
+        { row, col: col + 1 },
+        { row: row + 1, col: col + 1 },
+      ];
+    } else {
+      edge1 = [
+        { row, col },
+        { row, col: col + 1 },
+      ];
+      edge2 = [
+        { row: row + 1, col },
+        { row: row + 1, col: col + 1 },
+      ];
+    }
+
+    return (
+      (positionsEqual(from, edge1[0]) && positionsEqual(to, edge1[1])) ||
+      (positionsEqual(from, edge1[1]) && positionsEqual(to, edge1[0])) ||
+      (positionsEqual(from, edge2[0]) && positionsEqual(to, edge2[1])) ||
+      (positionsEqual(from, edge2[1]) && positionsEqual(to, edge2[0]))
+    );
+  });
+}
+
+function positionsEqual(a: Position, b: Position): boolean {
+  return a.row === b.row && a.col === b.col;
+}
+
+export function placeWall(state: GameState, wall: Wall): GameState {
+  return {
+    ...state,
+    walls: [...state.walls, wall],
+    turn: state.turn === "p1" ? "p2" : "p1",
+  };
+}
+
+export function isValidWallPlacement(state: GameState, wall: Wall): boolean {
+  return !state.walls.some((existingWall) => {
+    const { row, col } = existingWall.slot;
+    const rowDistance = Math.abs(row - wall.slot.row);
+    const colDistance = Math.abs(col - wall.slot.col);
+
+    if (existingWall.orientation !== wall.orientation) {
+      return rowDistance === 0 && colDistance === 0;
+    }
+    if (existingWall.orientation === "horizontal") {
+      return row === wall.slot.row && colDistance <= 1;
+    }
+    return col === wall.slot.col && rowDistance <= 1;
+  });
 }
