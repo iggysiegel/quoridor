@@ -14,6 +14,8 @@ export const INITIAL_STATE: GameState = {
   walls: [],
 };
 
+const MAX_WALLS = 10;
+
 export function getPlayerAt(
   state: GameState,
   position: Position,
@@ -149,17 +151,29 @@ export function placeWall(state: GameState, wall: Wall): GameState {
 }
 
 export function isValidWallPlacement(state: GameState, wall: Wall): boolean {
-  return !state.walls.some((existingWall) => {
-    const { row, col } = existingWall.slot;
-    const rowDistance = Math.abs(row - wall.slot.row);
-    const colDistance = Math.abs(col - wall.slot.col);
+  return (
+    getWallsRemaining(state, wall.player) > 0 &&
+    !state.walls.some((existingWall) => {
+      const { row, col } = existingWall.slot;
+      const rowDistance = Math.abs(row - wall.slot.row);
+      const colDistance = Math.abs(col - wall.slot.col);
 
-    if (existingWall.orientation !== wall.orientation) {
-      return rowDistance === 0 && colDistance === 0;
-    }
-    if (existingWall.orientation === "horizontal") {
-      return row === wall.slot.row && colDistance <= 1;
-    }
-    return col === wall.slot.col && rowDistance <= 1;
-  });
+      if (existingWall.orientation !== wall.orientation) {
+        return rowDistance === 0 && colDistance === 0;
+      }
+      if (existingWall.orientation === "horizontal") {
+        return row === wall.slot.row && colDistance <= 1;
+      }
+      return col === wall.slot.col && rowDistance <= 1;
+    })
+  );
+}
+
+export function getWallsRemaining(state: GameState, player: PlayerId): number {
+  return (
+    MAX_WALLS -
+    state.walls.filter((wall) => {
+      return wall.player === player;
+    }).length
+  );
 }

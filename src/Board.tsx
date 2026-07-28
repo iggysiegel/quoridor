@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import {
   getPlayerAt,
+  getWallsRemaining,
   getWinner,
   INITIAL_STATE,
   isValidMove,
@@ -62,6 +63,10 @@ export default function Board() {
   return (
     <>
       <div>{winner && <p>{winnerMessage}</p>}</div>
+      <div>
+        <p>Player 1: {getWallsRemaining(boardState, "p1")} Walls</p>
+        <p>Player 2: {getWallsRemaining(boardState, "p2")} Walls</p>
+      </div>
       <div className="board">
         {/* Cells */}
         {rows.map((row) =>
