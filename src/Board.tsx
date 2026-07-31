@@ -9,10 +9,11 @@ import {
   INITIAL_STATE,
   isValidMove,
   isValidWallPlacement,
+  MAX_WALLS,
   movePlayer,
   placeWall,
 } from "./game";
-import { type GameState, type Orientation } from "./types";
+import { type GameState, type Orientation, type PlayerId } from "./types";
 
 const ORIENTATIONS: Orientation[] = ["horizontal", "vertical"];
 
@@ -80,61 +81,81 @@ export default function Board() {
     setIsRotated(!isRotated);
   }
 
+  function renderWallIcons(player: PlayerId) {
+    const remaining = getWallsRemaining(boardState, player);
+    return Array.from({ length: MAX_WALLS }, (_, index) => (
+      <span
+        key={index}
+        className={`wall-icon wall-icon-${player} ${
+          index < remaining ? "" : "wall-icon-used"
+        }`}
+      />
+    ));
+  }
+
+  const p1WallIcons = <div className="wall-icons">{renderWallIcons("p1")}</div>;
+  const p2WallIcons = <div className="wall-icons">{renderWallIcons("p2")}</div>;
+
   const rows = Array.from({ length: 9 }, (_, row) => row);
   const cols = Array.from({ length: 9 }, (_, col) => col);
   const slots = Array.from({ length: rows.length - 1 }, (_, i) => i);
   return (
     <>
-      <div>{winner && <p>{winnerMessage}</p>}</div>
-      <div>
-        <p>Player 1: {getWallsRemaining(boardState, "p1")} Walls</p>
-        <p>Player 2: {getWallsRemaining(boardState, "p2")} Walls</p>
-      </div>
       <div className="game-area">
-        <div className={`board ${isRotated ? "rotated" : ""}`}>
-          {/* Cells */}
-          {rows.map((row) =>
-            cols.map((col) => {
-              const player = getPlayerAt(boardState, { row, col });
-              return (
-                <button
-                  key={`${row}-${col}`}
-                  className="cell"
-                  onClick={() => handleClick(row, col)}
-                  style={{ gridRow: 2 * row + 1, gridColumn: 2 * col + 1 }}
-                >
-                  {player && <span className={`piece piece-${player}`} />}
-                </button>
-              );
-            }),
-          )}
+        <div className="board-column">
+          <p className={`winner-message ${winner ? "visible" : ""}`}>
+            {winnerMessage ?? " "}
+          </p>
 
-          {/* Placed walls */}
-          {boardState.walls.map((wall, index) => (
-            <div
-              key={index}
-              className={`wall wall-${wall.player}`}
-              style={getWallGridArea(
-                wall.slot.row,
-                wall.slot.col,
-                wall.orientation,
-              )}
-            />
-          ))}
+          {isRotated ? p1WallIcons : p2WallIcons}
 
-          {/* Wall placement targets */}
-          {slots.map((row) =>
-            slots.map((col) =>
-              ORIENTATIONS.map((orientation) => (
-                <button
-                  key={`${row}-${col}-${orientation}`}
-                  className="wall-slot"
-                  onClick={() => handleWallClick(row, col, orientation)}
-                  style={getWallGridArea(row, col, orientation)}
-                />
-              )),
-            ),
-          )}
+          <div className={`board ${isRotated ? "rotated" : ""}`}>
+            {/* Cells */}
+            {rows.map((row) =>
+              cols.map((col) => {
+                const player = getPlayerAt(boardState, { row, col });
+                return (
+                  <button
+                    key={`${row}-${col}`}
+                    className="cell"
+                    onClick={() => handleClick(row, col)}
+                    style={{ gridRow: 2 * row + 1, gridColumn: 2 * col + 1 }}
+                  >
+                    {player && <span className={`piece piece-${player}`} />}
+                  </button>
+                );
+              }),
+            )}
+
+            {/* Placed walls */}
+            {boardState.walls.map((wall, index) => (
+              <div
+                key={index}
+                className={`wall wall-${wall.player}`}
+                style={getWallGridArea(
+                  wall.slot.row,
+                  wall.slot.col,
+                  wall.orientation,
+                )}
+              />
+            ))}
+
+            {/* Wall placement targets */}
+            {slots.map((row) =>
+              slots.map((col) =>
+                ORIENTATIONS.map((orientation) => (
+                  <button
+                    key={`${row}-${col}-${orientation}`}
+                    className="wall-slot"
+                    onClick={() => handleWallClick(row, col, orientation)}
+                    style={getWallGridArea(row, col, orientation)}
+                  />
+                )),
+              ),
+            )}
+          </div>
+
+          {isRotated ? p2WallIcons : p1WallIcons}
         </div>
 
         <div className="sidebar">

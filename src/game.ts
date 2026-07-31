@@ -14,7 +14,7 @@ export const INITIAL_STATE: GameState = {
   walls: [],
 };
 
-const MAX_WALLS = 10;
+export const MAX_WALLS = 10;
 
 export function getPlayerAt(
   state: GameState,

@@ -12,6 +12,19 @@
   transform: rotate(180deg);
 }
 
+.winner-message {
+  visibility: hidden;
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.winner-message.visible {
+  visibility: visible;
+}
+
 .cell {
   width: 40px;
   height: 40px;
@@ -68,6 +81,38 @@
   display: flex;
   align-items: center;
   gap: 24px;
+}
+
+.board-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.wall-icons {
+  display: flex;
+  gap: 18px;
+}
+
+.wall-icon {
+  width: 10px;
+  height: 32px;
+  border-radius: 2px;
+}
+
+.wall-icon-p1 {
+  background: #d64545;
+}
+
+.wall-icon-p2 {
+  background: #2c6fbb;
+}
+
+.wall-icon-used {
+  background: transparent;
+  border: 1px solid #333;
+  opacity: 0.4;
 }
 
 .sidebar {
