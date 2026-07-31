@@ -142,6 +142,46 @@ function positionsEqual(a: Position, b: Position): boolean {
   return a.row === b.row && a.col === b.col;
 }
 
+function hasPathToGoal(state: GameState, player: PlayerId): boolean {
+  const goalRow = player === "p1" ? 0 : 8;
+  const start = state.positions[player];
+  const key = (position: Position) => `${position.row},${position.col}`;
+
+  const visited = new Set<string>([key(start)]);
+  const queue: Position[] = [start];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (current.row === goalRow) {
+      return true;
+    }
+
+    const neighbors = [
+      { row: current.row - 1, col: current.col },
+      { row: current.row + 1, col: current.col },
+      { row: current.row, col: current.col - 1 },
+      { row: current.row, col: current.col + 1 },
+    ];
+    for (const neighbor of neighbors) {
+      const onBoard =
+        neighbor.row >= 0 &&
+        neighbor.row <= 8 &&
+        neighbor.col >= 0 &&
+        neighbor.col <= 8;
+      if (
+        onBoard &&
+        !visited.has(key(neighbor)) &&
+        !isBlockedByWall(state, current, neighbor)
+      ) {
+        visited.add(key(neighbor));
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return false;
+}
+
 export function placeWall(state: GameState, wall: Wall): GameState {
   return {
     ...state,
@@ -151,21 +191,26 @@ export function placeWall(state: GameState, wall: Wall): GameState {
 }
 
 export function isValidWallPlacement(state: GameState, wall: Wall): boolean {
-  return (
-    getWallsRemaining(state, wall.player) > 0 &&
-    !state.walls.some((existingWall) => {
-      const { row, col } = existingWall.slot;
-      const rowDistance = Math.abs(row - wall.slot.row);
-      const colDistance = Math.abs(col - wall.slot.col);
+  const overlapsExistingWall = state.walls.some((existingWall) => {
+    const { row, col } = existingWall.slot;
+    const rowDistance = Math.abs(row - wall.slot.row);
+    const colDistance = Math.abs(col - wall.slot.col);
 
-      if (existingWall.orientation !== wall.orientation) {
-        return rowDistance === 0 && colDistance === 0;
-      }
-      if (existingWall.orientation === "horizontal") {
-        return row === wall.slot.row && colDistance <= 1;
-      }
-      return col === wall.slot.col && rowDistance <= 1;
-    })
+    if (existingWall.orientation !== wall.orientation) {
+      return rowDistance === 0 && colDistance === 0;
+    }
+    if (existingWall.orientation === "horizontal") {
+      return row === wall.slot.row && colDistance <= 1;
+    }
+    return col === wall.slot.col && rowDistance <= 1;
+  });
+  if (getWallsRemaining(state, wall.player) <= 0 || overlapsExistingWall) {
+    return false;
+  }
+
+  const stateWithWall: GameState = { ...state, walls: [...state.walls, wall] };
+  return (
+    hasPathToGoal(stateWithWall, "p1") && hasPathToGoal(stateWithWall, "p2")
   );
 }
 
