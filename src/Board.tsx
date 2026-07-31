@@ -114,6 +114,12 @@ export default function Board() {
             {rows.map((row) =>
               cols.map((col) => {
                 const player = getPlayerAt(boardState, { row, col });
+                const isMoveTarget =
+                  !winner &&
+                  isValidMove(boardState, boardState.turn, {
+                    row,
+                    col,
+                  });
                 return (
                   <button
                     key={`${row}-${col}`}
@@ -122,6 +128,11 @@ export default function Board() {
                     style={{ gridRow: 2 * row + 1, gridColumn: 2 * col + 1 }}
                   >
                     {player && <span className={`piece piece-${player}`} />}
+                    {isMoveTarget && (
+                      <span
+                        className={`move-highlight move-highlight-${boardState.turn}`}
+                      />
+                    )}
                   </button>
                 );
               }),

@@ -53,6 +53,20 @@
   background: #2c6fbb;
 }
 
+.move-highlight {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.move-highlight-p1 {
+  background: rgba(214, 69, 69, 0.35);
+}
+
+.move-highlight-p2 {
+  background: rgba(44, 111, 187, 0.35);
+}
+
 .wall {
   border-radius: 4px;
 }
