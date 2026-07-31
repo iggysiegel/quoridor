@@ -80,23 +80,53 @@ export function isValidMove(
     return true;
   }
 
-  // Special move (jumping straight over the opponent)
+  // Special move (jumping over the opponent)
   const isStraightJump =
     (rowDistance === 2 && colDistance === 0) ||
     (rowDistance === 0 && colDistance === 2);
-  if (!isStraightJump) {
+  const isDiagonalJump = rowDistance === 1 && colDistance === 1;
+  const opponent = player === "p1" ? "p2" : "p1";
+
+  if (isStraightJump) {
+    // Straight jump
+    const midpoint = {
+      row: (currentPosition.row + target.row) / 2,
+      col: (currentPosition.col + target.col) / 2,
+    };
+    return (
+      getPlayerAt(state, midpoint) === opponent &&
+      !isBlockedByWall(state, currentPosition, midpoint) &&
+      !isBlockedByWall(state, midpoint, target)
+    );
+  } else if (isDiagonalJump) {
+    // Diagonal jump; the opponent could be adjacent in either direction
+    // that forms an "L" toward the target
+    const elbowCandidates = [
+      { row: target.row, col: currentPosition.col },
+      { row: currentPosition.row, col: target.col },
+    ];
+    return elbowCandidates.some((candidate) => {
+      const straightJumpTarget = {
+        row: 2 * candidate.row - currentPosition.row,
+        col: 2 * candidate.col - currentPosition.col,
+      };
+      const isStraightJumpTargetOnBoard =
+        straightJumpTarget.row >= 0 &&
+        straightJumpTarget.row <= 8 &&
+        straightJumpTarget.col >= 0 &&
+        straightJumpTarget.col <= 8;
+
+      return (
+        getPlayerAt(state, candidate) === opponent &&
+        !isBlockedByWall(state, currentPosition, candidate) &&
+        (!isStraightJumpTargetOnBoard ||
+          isBlockedByWall(state, candidate, straightJumpTarget)) &&
+        !isBlockedByWall(state, candidate, target)
+      );
+    });
+  } else {
     return false;
   }
-  const midpoint = {
-    row: (currentPosition.row + target.row) / 2,
-    col: (currentPosition.col + target.col) / 2,
-  };
-  const opponent = player === "p1" ? "p2" : "p1";
-  return (
-    getPlayerAt(state, midpoint) === opponent &&
-    !isBlockedByWall(state, currentPosition, midpoint) &&
-    !isBlockedByWall(state, midpoint, target)
-  );
 }
 
 function isBlockedByWall(
