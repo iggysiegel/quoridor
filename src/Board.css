@@ -5,6 +5,11 @@
   grid-template-columns: repeat(8, 40px 8px) 40px;
   grid-template-rows: repeat(8, 40px 8px) 40px;
   width: fit-content;
+  transition: transform 1s ease;
+}
+
+.board.rotated {
+  transform: rotate(180deg);
 }
 
 .cell {
@@ -57,4 +62,28 @@
 .wall-slot:hover {
   background: rgba(107, 74, 47, 0.4);
   border-radius: 4px;
+}
+
+.game-area {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-button {
+  padding: 8px 16px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.sidebar-button:hover {
+  background: rgba(107, 74, 47, 0.1);
 }
