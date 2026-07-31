@@ -1,9 +1,16 @@
 .board {
-  /* 9 cell tracks (40px) interleaved with 8 gap tracks (8px); walls render and
-     get placed in the gaps between cells. */
+  /* 9 cell tracks interleaved with 8 gap tracks; walls render and get placed
+     in the gaps between cells. Sized off --cell-size/--gap-size so a single
+     media query can shrink the whole grid for narrow screens. */
+  --cell-size: 40px;
+  --gap-size: 8px;
   display: grid;
-  grid-template-columns: repeat(8, 40px 8px) 40px;
-  grid-template-rows: repeat(8, 40px 8px) 40px;
+  grid-template-columns: repeat(8, var(--cell-size) var(--gap-size)) var(
+      --cell-size
+    );
+  grid-template-rows: repeat(8, var(--cell-size) var(--gap-size)) var(
+      --cell-size
+    );
   width: fit-content;
   transition: transform 1s ease;
 }
@@ -15,7 +22,7 @@
 .winner-message {
   visibility: hidden;
   margin: 0;
-  color: #333;
+  color: var(--text);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -26,13 +33,13 @@
 }
 
 .cell {
-  width: 40px;
-  height: 40px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   padding: 0;
   box-sizing: border-box;
   appearance: none;
-  border: 1px solid #333;
-  background: #fff;
+  border: 1px solid var(--border);
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,6 +87,7 @@
 }
 
 .wall-slot {
+  appearance: none;
   background: transparent;
   border: none;
   padding: 0;
@@ -125,7 +133,7 @@
 
 .wall-icon-used {
   background: transparent;
-  border: 1px solid #333;
+  border: 1px solid var(--border);
   opacity: 0.4;
 }
 
@@ -136,13 +144,30 @@
 }
 
 .sidebar-button {
+  appearance: none;
   padding: 8px 16px;
-  border: 1px solid #333;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--bg);
+  color: var(--text);
   cursor: pointer;
 }
 
 .sidebar-button:hover {
   background: rgba(107, 74, 47, 0.1);
+}
+
+@media (max-width: 600px) {
+  .board {
+    --cell-size: 30px;
+    --gap-size: 5px;
+  }
+
+  .game-area {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex-direction: row;
+  }
 }

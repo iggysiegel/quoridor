@@ -1,7 +1,7 @@
 :root {
-  --text: #6b6375;
+  --text: #4a4353;
   --bg: #fff;
-  --border: #e5e4e7;
+  --border: #b6b4ba;
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
 
@@ -24,7 +24,7 @@
   :root {
     --text: #9ca3af;
     --bg: #16171d;
-    --border: #2e303a;
+    --border: #4a4d5c;
   }
 }
 
@@ -33,7 +33,6 @@
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
